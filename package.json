@@ -1,0 +1,50 @@
+{
+  "name": "swagger-rest",
+  "version": "1.0.0",
+  "description": "Swagger REST Demo",
+  "keywords": [
+    "Node.js",
+    "swagger"
+  ],
+  "author": {
+    "name": "Lou Sacco",
+    "email": "occasl@yahoo.com",
+    "url": "http://loutilities.wordpress.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loutilities/swagger-rest"
+  },
+  "engines": {
+    "node": ">= 4.2.1",
+    "npm": ">= 1.1.59"
+  },
+  "dependencies": {
+    "bunyan": "^1.5.1",
+    "lodash": "^3.10.1",
+    "nconf": "^0.8.2",
+    "passport": "^0.3.2",
+    "passport-http": "^0.3.0",
+    "restify": "^4.0.3",
+    "winston": "^2.1.1"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "chai-string": "^1.1.4",
+    "config-leaf": "~0.1.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-execute": "^0.2.2",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-rename": "~0.1.4",
+    "grunt-run": "~0.2.4",
+    "grunt-string-replace": "~0.2.4",
+    "grunt-wait": "^0.1.0",
+    "hippie": "^0.4.0"
+  },
+  "bundleDependencies": [],
+  "private": true,
+  "main": "server.js"
+}
