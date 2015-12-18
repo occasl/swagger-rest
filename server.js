@@ -6,7 +6,7 @@
         swagger = require('./api/swagger.js');
 
     // Get the environment variables we need.
-    var host = process.env.DOCKER_HOST2 || 'localhost';
+    var host = process.env.DOCKER_HOST || 'localhost';
     var port = process.env.DOCKER_PORT || 8080;
     var version = process.env.VERSION || "1.0.0";
 
