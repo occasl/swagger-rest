@@ -60,7 +60,7 @@
             port: port,
             method: 'POST',
             headers: {
-                'Content-type': 'application/json',
+                'Content-Type': 'application/json',
                 'api_key': apiKey
             }
         };
@@ -104,7 +104,7 @@
             port: port,
             method: 'DELETE',
             headers: {
-                'Content-type': 'application/json',
+                'Content-Type': 'application/json',
                 'api_key': apiKey
             }
         };
