@@ -1,3 +1,10 @@
+// Blanket for code coverage
+require('blanket')({
+    pattern: function (filename) {
+        return !/node_modules/.test(filename);
+    }
+});
+
 (function () {
     "use strict";
     var restify = require('restify');
@@ -11,15 +18,48 @@
 
     var client = restify.createJsonClient({
         version: '1.0.0',
-        //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-uw2-c.qualcomm.com',
+        //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-ssat.qualcomm.com/',
         //url: 'http://192.168.99.100:8080',
-        url: 'http://localhost:8080',
+        //url: 'http://localhost:8080',
+        url: process.env.APPLICATION_HOSTNAME,
         headers: {Authorization: 'Basic dXNlcjpwYXNzd29yZA=='}
     });
 
+    var timeout = 30000; //in ms
     describe('swagger-tests', function () {
+        describe('#createDeletePets', function () {
+            this.timeout(timeout);
+            var petId;
+            it('should add a new pet', function (done) {
+                var json = {
+                    "name": "freddie",
+                    "photoUrls": ["http://pet.swagger.com/456.png"],
+                    "tags": [{"id": 0, "name": "fredclan"}]
+                };
+                client.post('/pet/', json, function (err, req, res, data) {
+                    if (err) {
+                        throw new Error(err);
+                    }
+                    else {
+                        var result = JSON.parse(JSON.parse(data));
+                        petId = result.id; // use to clean-up during delete
+                        (result.name).should.equal(json.name);
+                    }
+                    done();
+                });
+            });
+            it('should delete a pet', function (done) {
+                client.del('/pet/' + petId, function (err, req, res, data) {
+                    if (err) {
+                        throw new Error(err);
+                    }
+                    data.should.be.empty;
+                    done();
+                });
+            });
+        });
         describe('#getPets', function () {
-            this.timeout(5000);
+            this.timeout(timeout);
             it('should exist and return an Array', function (done) {
                 client.get('/pet?status=available,pending,sold', function (err, req, res, data) {
                     if (err) {
@@ -86,25 +126,6 @@
                     }
                 });
             });
-            it('should be sorted by name', function (done) {
-                client.get('/pet?sort=name', function (err, req, res, data) {
-                    if (err) {
-                        throw new Error(err);
-                    }
-                    else {
-                        data.should.have.length.above(1);
-                        _.forEach(data, function (val, idx, array) {
-                            if (typeof val.name !== 'undefined' && idx >= 1) {
-                                if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
-                                    console.log(val.name + " <= " + array[idx-1].name);
-                                }
-                                (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
-                            }
-                        });
-                        done();
-                    }
-                });
-            });
             it('should be only available pets', function (done) {
                 client.get('/pet/findByStatus/available', function (err, req, res, data) {
                     if (err) {
@@ -124,33 +145,25 @@
                 });
             });
         });
-        describe('#createDeletePets', function () {
-            var petId;
-            it('should add a new pet', function (done) {
-                var json = {
-                    "name": "freddie",
-                    "photoUrls": ["http://pet.swagger.com/456.png"],
-                    "tags": [{"id": 0, "name": "fredclan"}]
-                };
-                client.post('/pet/', json, function (err, req, res, data) {
+        describe('#getPetsSortedByName', function () {
+            this.timeout(500000); // this one takes longer than the others
+            it('should be sorted by name', function (done) {
+                client.get('/pet?sort=name', function (err, req, res, data) {
                     if (err) {
                         throw new Error(err);
                     }
                     else {
-                        var result = JSON.parse(JSON.parse(data));
-                        petId = result.id; // use to clean-up during delete
-                        (result.name).should.equal(json.name);
+                        data.should.have.length.above(1);
+                        _.forEach(data, function (val, idx, array) {
+                            if (typeof val.name !== 'undefined' && idx >= 1) {
+                                if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
+                                    console.log(val.name + " <= " + array[idx-1].name);
+                                }
+                                (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
+                            }
+                        });
+                        done();
                     }
-                    done();
-                });
-            });
-            it('should delete a pet', function (done) {
-                client.del('/pet/' + petId, function (err, req, res, data) {
-                    if (err) {
-                        throw new Error(err);
-                    }
-                    data.should.be.empty;
-                    done();
                 });
             });
         });
