@@ -1,10 +1,3 @@
-// Blanket for code coverage
-require('blanket')({
-    pattern: function (filename) {
-        return !/node_modules/.test(filename);
-    }
-});
-
 (function () {
     "use strict";
     var restify = require('restify');
@@ -27,9 +20,9 @@ require('blanket')({
 
     var timeout = 30000; //in ms
     describe('swagger-tests', function () {
-        describe('#createDeletePets', function () {
+        var petId;
+        describe('#createPet', function () {
             this.timeout(timeout);
-            var petId;
             it('should add a new pet', function (done) {
                 var json = {
                     "name": "freddie",
@@ -45,15 +38,6 @@ require('blanket')({
                         petId = result.id; // use to clean-up during delete
                         (result.name).should.equal(json.name);
                     }
-                    done();
-                });
-            });
-            it('should delete a pet', function (done) {
-                client.del('/pet/' + petId, function (err, req, res, data) {
-                    if (err) {
-                        throw new Error(err);
-                    }
-                    data.should.be.empty;
                     done();
                 });
             });
@@ -164,6 +148,18 @@ require('blanket')({
                         });
                         done();
                     }
+                });
+            });
+        });
+        describe('#deletePet', function () {
+            this.timeout(timeout);
+            it('should delete a pet', function (done) {
+                client.del('/pet/' + petId, function (err, req, res, data) {
+                    if (err) {
+                        throw new Error(err);
+                    }
+                    data.should.be.empty;
+                    done();
                 });
             });
         });

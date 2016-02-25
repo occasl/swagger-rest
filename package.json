@@ -19,6 +19,9 @@
     "node": ">= 4.2.1",
     "npm": ">= 1.1.59"
   },
+  "scripts": {
+    "ci-test": "istanbul cover --report html node_modules/.bin/_mocha -- -R spec"
+  },
   "dependencies": {
     "bunyan": "^1.5.1",
     "lodash": "^3.10.1",
@@ -45,9 +48,11 @@
     "grunt-string-replace": "~0.2.4",
     "grunt-wait": "^0.1.0",
     "hippie": "^0.4.0",
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "mocha-jenkins-reporter": "0.1.9",
-    "mocha-junit-reporter": "1.9.1"
+    "mocha-junit-reporter": "1.9.1",
+    "tape": "^4.4.0"
   },
   "bundleDependencies": [],
   "private": true,
