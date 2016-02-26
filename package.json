@@ -50,7 +50,6 @@
     "hippie": "^0.4.0",
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
-    "mocha-jenkins-reporter": "0.1.9",
     "mocha-junit-reporter": "1.9.1",
     "tape": "^4.4.0"
   },

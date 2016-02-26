@@ -129,28 +129,28 @@
                 });
             });
         });
-        describe('#getPetsSortedByName', function () {
-            this.timeout(500000); // this one takes longer than the others
-            it('should be sorted by name', function (done) {
-                client.get('/pet?sort=name', function (err, req, res, data) {
-                    if (err) {
-                        throw new Error(err);
-                    }
-                    else {
-                        data.should.have.length.above(1);
-                        _.forEach(data, function (val, idx, array) {
-                            if (typeof val.name !== 'undefined' && idx >= 1) {
-                                if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
-                                    console.log(val.name + " <= " + array[idx-1].name);
-                                }
-                                (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
-                            }
-                        });
-                        done();
-                    }
-                });
-            });
-        });
+        //describe('#getPetsSortedByName', function () {
+        //    this.timeout(500000); // this one takes longer than the others
+        //    it('should be sorted by name', function (done) {
+        //        client.get('/pet?sort=name', function (err, req, res, data) {
+        //            if (err) {
+        //                throw new Error(err);
+        //            }
+        //            else {
+        //                data.should.have.length.above(1);
+        //                _.forEach(data, function (val, idx, array) {
+        //                    if (typeof val.name !== 'undefined' && idx >= 1) {
+        //                        if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
+        //                            console.log(val.name + " <= " + array[idx-1].name);
+        //                        }
+        //                        (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
+        //                    }
+        //                });
+        //                done();
+        //            }
+        //        });
+        //    });
+        //});
         describe('#deletePet', function () {
             this.timeout(timeout);
             it('should delete a pet', function (done) {
