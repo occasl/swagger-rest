@@ -1,3 +1,5 @@
 results.txt
 *.xml
 *.html
+coverage/
+.instrument/
