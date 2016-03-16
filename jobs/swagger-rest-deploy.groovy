@@ -286,7 +286,7 @@ def undeployApp(env) {
 }
 
 def dockerDeploy() {
-    docker.withRegistry('DOCKER_REGISTRY') {
+    docker.withRegistry(DOCKER_APPLICATION_IMAGE) {
         def image = docker.image(APPLICATION_NAME);
         image.tag("latest");
         image.push()
