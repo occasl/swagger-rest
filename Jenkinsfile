@@ -175,6 +175,7 @@ def deploySlave() {
     sh '''apc job start ''' + SLAVE_NAME
 }
 
+@Whitelisted
 def undeploySlave() {
     echo "Undeploying slave node"
 
@@ -182,27 +183,24 @@ def undeploySlave() {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // stop the slave Docker job
     try {
         stopJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // delete the slave Docker Job
     try {
         deleteJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // remove the slave node from the Jenkins cluster
@@ -213,9 +211,8 @@ def undeploySlave() {
             }
         }
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 }
 
@@ -271,6 +268,7 @@ def deployApp(env) {
 
 }
 
+@Whitelisted
 def undeployApp(env) {
     echo "Undeploying apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
@@ -280,31 +278,29 @@ def undeployApp(env) {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // stop the application Docker job
     try {
         stopJob( appDockerJobName )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // delete the application Docker Job
     try {
         deleteJob( appDockerJobName )
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
 
     }
 }
 
+@Whitelisted
 def runTests(env) {
     connectApc()
     echo "Testing apps on " + env
@@ -329,14 +325,14 @@ def runTests(env) {
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
 
     } catch (e) {
-        def msg = @Whitelisted e.getMessage()
-        emailError(msg)
-        echo msg
+        emailError(e.getMessage())
+        echo e.getMessage()
     }
 }
 
+@Whitelisted
 def dockerDeploy() {
-    @Whitelisted withDockerRegistry([credentialsId: 'apc-lsacco', url: 'https://docker-registry.qualcomm.com/lsacco/swagger-rest']) {
+    docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
 //        image.push()
