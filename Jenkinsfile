@@ -1,6 +1,11 @@
 import groovy.transform.Field
 import hudson.model.*
 
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry
+
 /*  ----------------
  *  Global variables
  *  ----------------
