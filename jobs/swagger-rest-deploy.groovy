@@ -286,11 +286,11 @@ def undeployApp(env) {
 }
 
 def dockerDeploy() {
-    docker.withRegistry(DOCKER_APPLICATION_IMAGE) {
-        def image = docker.image(APPLICATION_NAME);
-        image.tag("latest");
-        image.push()
-    }
+//    docker.withRegistry(DOCKER_APPLICATION_IMAGE) {
+//        def image = docker.image(APPLICATION_NAME);
+//        image.tag("latest");
+//        image.push()
+//    }
 }
 
 def runTests(env) {
