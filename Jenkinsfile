@@ -185,24 +185,21 @@ def undeploySlave() {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error leaving network'
     }
 
     // stop the slave Docker job
     try {
         stopJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error stopping job'
     }
 
     // delete the slave Docker Job
     try {
         deleteJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error deleting job'
     }
 
     // remove the slave node from the Jenkins cluster
@@ -213,8 +210,7 @@ def undeploySlave() {
             }
         }
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error removing slave'
     }
 }
 
@@ -280,24 +276,21 @@ def undeployApp(env) {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error leaving network'
     }
 
     // stop the application Docker job
     try {
         stopJob( appDockerJobName )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error stopping job'
     }
 
     // delete the application Docker Job
     try {
         deleteJob( appDockerJobName )
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error deleting job'
 
     }
 }
@@ -327,8 +320,7 @@ def runTests(env) {
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
 
     } catch (e) {
-        emailError(e.getMessage())
-        echo e.getMessage()
+        echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
     }
 }
 
