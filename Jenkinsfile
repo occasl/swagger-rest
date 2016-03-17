@@ -105,7 +105,7 @@ node( MASTER_NODE ) {
     echo "Finalizing workflow job"
     undeploySlave()
     mail (to: EMAIL_PROJECT,
-            subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) successfully deployed to PROD",
+            subject: "Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD",
             body: "Please go to ${env.BUILD_URL}.")
 }
 
@@ -186,6 +186,7 @@ def undeploySlave() {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
         echo 'Error leaving network'
+        emailError()
     }
 
     // stop the slave Docker job
@@ -193,6 +194,7 @@ def undeploySlave() {
         stopJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
         echo 'Error stopping job'
+        emailError()
     }
 
     // delete the slave Docker Job
@@ -200,6 +202,7 @@ def undeploySlave() {
         deleteJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
         echo 'Error deleting job'
+        emailError()
     }
 
     // remove the slave node from the Jenkins cluster
@@ -211,6 +214,7 @@ def undeploySlave() {
         }
     } catch (e) {
         echo 'Error removing slave'
+        emailError()
     }
 }
 
@@ -277,6 +281,7 @@ def undeployApp(env) {
         leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
     } catch (e) {
         echo 'Error leaving network'
+        emailError()
     }
 
     // stop the application Docker job
@@ -284,6 +289,7 @@ def undeployApp(env) {
         stopJob( appDockerJobName )
     } catch (e) {
         echo 'Error stopping job'
+        emailError()
     }
 
     // delete the application Docker Job
@@ -291,6 +297,7 @@ def undeployApp(env) {
         deleteJob( appDockerJobName )
     } catch (e) {
         echo 'Error deleting job'
+        emailError()
 
     }
 }
@@ -321,6 +328,7 @@ def runTests(env) {
 
     } catch (e) {
         echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
+        emailError()
     }
 }
 
@@ -366,8 +374,8 @@ def deleteJob(job) {
     '''
 }
 
-def emailError(msg) {
+def emailError() {
     mail (to: EMAIL_PROJECT,
-            subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) resulted in an error",
-            body: "${msg}//nPlease go to ${env.BUILD_URL}.")
+            subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
+            body: "Please go to ${env.BUILD_URL}.")
 }
