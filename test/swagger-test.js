@@ -13,8 +13,8 @@
         version: '1.0.0',
         //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-ssat.qualcomm.com/',
         //url: 'http://192.168.99.100:8080',
-        url: 'http://localhost:8080',
-        //url: process.env.APPLICATION_HOSTNAME,
+        //url: 'http://localhost:8080',
+        url: process.env.APPLICATION_HOSTNAME,
         headers: {Authorization: 'Basic dXNlcjpwYXNzd29yZA=='}
     });
 
