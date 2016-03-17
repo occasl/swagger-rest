@@ -65,7 +65,7 @@ node( SLAVE_NODE ) {
     deployApp('dev')
 }
 
-stage "Test"
+stage "Integration Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
     runTests('dev')
@@ -77,7 +77,7 @@ node( SLAVE_NODE ) {
 //    dockerDeploy()
 }
 
-stage "TEST Deploy"
+stage "QA Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to Test"
     deployApp('test')
