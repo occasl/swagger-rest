@@ -67,7 +67,7 @@ node( SLAVE_NODE ) {
 stage "Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
-    runTests('dev')
+//    runTests('dev')
 }
 
 stage "Publish Docker Image"
@@ -287,7 +287,7 @@ def undeployApp(env) {
 
 def dockerDeploy() {
     // This step should not normally be used in your script. Consult the inline help for details.
-    withDockerRegistry([credentialsId: 'apc-lsacco', url: 'https://docker-registry.qualcomm.com/lsacco/swagger-rest']) {
+    docker.withDockerRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', 'apc-lsacco') {
         def image = docker.image(APPLICATION_NAME);
         image.tag("latest");
         image.push()
