@@ -337,6 +337,7 @@ def runTests(env) {
 
 @Whitelisted
 def dockerDeploy() {
+    sh 'which docker;docker version'
     withEnv(['HOME='+pwd()]) {
         docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
 //        def image = docker.image(APPLICATION_NAME)
