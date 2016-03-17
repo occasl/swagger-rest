@@ -1,10 +1,7 @@
 import groovy.transform.Field
 import hudson.model.*
 
-import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
-import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext
-import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry
 
 /*  ----------------
  *  Global variables
@@ -71,13 +68,13 @@ node( SLAVE_NODE ) {
 stage "Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
-//    runTests('dev')
+    runTests('dev')
 }
 
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-    dockerDeploy()
+//    dockerDeploy()
 }
 
 stage "TEST Deploy"
@@ -314,18 +311,18 @@ def runTests(env) {
 
     try {
         sh '''
-        apc app connect ''' + SLAVE_NAME + '''
-        if [ ! -d swagger-rest ] ; then
-            git clone ''' + GITHUB_PROJECT + ''' --branch develop --single-branch
-        fi
-        cd swagger-rest
-        npm config set registry="http://registry.npmjs.org/"
-        npm install
-        ./node_modules/grunt-cli/bin/grunt
-        export APPLICATION_HOSTNAME=''' + appDomain + '''
-        export MOCHA_FILE=./jenkins-test-results.xml
-        ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter
-    '''
+            apc app connect ''' + SLAVE_NAME + '''
+            if [ ! -d swagger-rest ] ; then
+                git clone ''' + GITHUB_PROJECT + ''' --branch develop --single-branch
+            fi
+            cd swagger-rest
+            npm config set registry="http://registry.npmjs.org/"
+            npm install
+            ./node_modules/grunt-cli/bin/grunt
+            export APPLICATION_HOSTNAME=''' + appDomain + '''
+            export MOCHA_FILE=./jenkins-test-results.xml
+            ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter
+        '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
 
@@ -337,7 +334,6 @@ def runTests(env) {
 
 @Whitelisted
 def dockerDeploy() {
-    sh 'which docker;docker version'
     withEnv(['HOME='+pwd()]) {
         docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
 //        def image = docker.image(APPLICATION_NAME)
