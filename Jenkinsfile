@@ -86,7 +86,7 @@ node( SLAVE_NODE ) {
     echo "Deploying to PROD"
     mail (to: EMAIL_PROJECT,
             subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is ready to deploy to PROD",
-            body: "Please go to ${env.BUILD_URL}.");
+            body: "Please go to ${env.BUILD_URL}.")
     input 'Deploy to Production?'
     deployApp('prod')
 }
@@ -102,6 +102,9 @@ stage "Finalize"
 node( MASTER_NODE ) {
     echo "Finalizing workflow job"
     undeploySlave()
+    mail (to: EMAIL_PROJECT,
+            subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) successfully deployed to PROD",
+            body: "Please go to ${env.BUILD_URL}.")
 }
 
 /*  ----------------
@@ -179,24 +182,24 @@ def undeploySlave() {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // stop the slave Docker job
     try {
         stopJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // delete the slave Docker Job
     try {
         deleteJob( APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // remove the slave node from the Jenkins cluster
@@ -207,8 +210,8 @@ def undeploySlave() {
             }
         }
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 }
 
@@ -273,24 +276,24 @@ def undeployApp(env) {
     try {
         leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // stop the application Docker job
     try {
         stopJob( appDockerJobName )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 
     // delete the application Docker Job
     try {
         deleteJob( appDockerJobName )
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
 
     }
 }
@@ -319,15 +322,15 @@ def runTests(env) {
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
 
     } catch (e) {
-        e.printStackTrace();
         emailError(e.getMessage())
+        echo e.getMessage()
     }
 }
 
 def dockerDeploy() {
     docker.withDockerRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
-        def image = docker.image(APPLICATION_NAME);
-        image.tag("latest");
+        def image = docker.image(APPLICATION_NAME)
+        image.tag("latest")
         image.push()
     }
 }
@@ -365,5 +368,5 @@ def deleteJob(job) {
 def emailError(msg) {
     mail (to: EMAIL_PROJECT,
             subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) resulted in an error",
-            body: "${msg}//nPlease go to ${env.BUILD_URL}.");
+            body: "${msg}//nPlease go to ${env.BUILD_URL}.")
 }
