@@ -71,13 +71,13 @@ node( SLAVE_NODE ) {
 stage "Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
-//    runTests('dev')
+    runTests('dev')
 }
 
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-    dockerDeploy()
+//    dockerDeploy()
 }
 
 stage "TEST Deploy"
