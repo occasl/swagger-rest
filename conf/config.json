@@ -1,7 +1,7 @@
 {
-  "swagger.host": "petstore.swagger.io",
-  "swagger.port": "80",
-  "id": "user",
-  "pwd": "password",
-  "secretAccessKey": "special-key"
+  "swagger.host": "$SWAGGER_SERVER",
+  "swagger.port": "$SWAGGER_PORT",
+  "id": "$ID",
+  "pwd": "$PWD",
+  "secretAccessKey": "$SECRET_ACCESS_KEY"
 }
