@@ -1,5 +1,7 @@
 import hudson.model.*
 
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
+
 /*  ----------------
  *  Global variables
  *  ----------------
@@ -174,6 +176,7 @@ def deploySlave() {
     sh '''apc job start ''' + SLAVE_NAME
 }
 
+@Whitelisted
 def undeploySlave() {
     echo "Undeploying slave node"
 
@@ -266,6 +269,7 @@ def deployApp(env) {
 
 }
 
+@Whitelisted
 def undeployApp(env) {
     echo "Undeploying apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
@@ -297,6 +301,7 @@ def undeployApp(env) {
     }
 }
 
+@Whitelisted
 def runTests(env) {
     connectApc()
     echo "Testing apps on " + env
@@ -326,6 +331,7 @@ def runTests(env) {
     }
 }
 
+@Whitelisted
 def dockerDeploy() {
     withEnv(['HOME='+pwd()]) {
         docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
