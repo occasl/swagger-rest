@@ -1,32 +1,31 @@
+import groovy.transform.Field
 import hudson.model.*
-
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 /*  ----------------
  *  Global variables
  *  ----------------
  */
-def MASTER_NODE = "master"
-def SLAVE_NODE = "slave"
-def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
-def APPLICATION_NAME = "swagger-rest"
-def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
-def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
-def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-def DOCKER_SLAVE_TAG = "1.4"
-def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
-def APC_VERSION = "0.28.2"
-def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
-def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
-def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
+@Field def MASTER_NODE = "master"
+@Field def SLAVE_NODE = "slave"
+@Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
+@Field def APPLICATION_NAME = "swagger-rest"
+@Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
+@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
+@Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
+@Field def DOCKER_SLAVE_TAG = "1.4"
+@Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
+@Field def APC_VERSION = "0.28.2"
+@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
+@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
+@Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
 
 // Change these variables for your project
 
-def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
-def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
-def DOCKER_APPLICATION_TAG = "latest"
-def EMAIL_PROJECT = "lsacco@qualcomm.com"
-def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
+@Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
+@Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
+@Field def DOCKER_APPLICATION_TAG = "latest"
+@Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
+@Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 
 
 /*  ------------------
@@ -176,7 +175,6 @@ def deploySlave() {
     sh '''apc job start ''' + SLAVE_NAME
 }
 
-@Whitelisted
 def undeploySlave() {
     echo "Undeploying slave node"
 
@@ -269,7 +267,6 @@ def deployApp(env) {
 
 }
 
-@Whitelisted
 def undeployApp(env) {
     echo "Undeploying apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
@@ -301,7 +298,6 @@ def undeployApp(env) {
     }
 }
 
-@Whitelisted
 def runTests(env) {
     connectApc()
     echo "Testing apps on " + env
@@ -331,7 +327,6 @@ def runTests(env) {
     }
 }
 
-@Whitelisted
 def dockerDeploy() {
     withEnv(['HOME='+pwd()]) {
         docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
