@@ -210,8 +210,9 @@ def undeploySlave() {
             }
         }
     } catch (e) {
-        echo 'Error removing slave'
-        emailError()
+        //TODO falls in catch block but removes slave successfully :/
+//        echo 'Error removing slave'
+//        emailError()
     }
 }
 
