@@ -14,6 +14,7 @@
         //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-ssat.qualcomm.com/',
         //url: 'http://192.168.99.100:8080',
         //url: 'http://localhost:8080',
+        // Required for Jenkins CI/CD Build
         url: process.env.APPLICATION_HOSTNAME,
         headers: {Authorization: 'Basic dXNlcjpwYXNzd29yZA=='}
     });
@@ -129,28 +130,28 @@
                 });
             });
         });
-        //describe('#getPetsSortedByName', function () {
-        //    this.timeout(500000); // this one takes longer than the others
-        //    it('should be sorted by name', function (done) {
-        //        client.get('/pet?sort=name', function (err, req, res, data) {
-        //            if (err) {
-        //                throw new Error(err);
-        //            }
-        //            else {
-        //                data.should.have.length.above(1);
-        //                _.forEach(data, function (val, idx, array) {
-        //                    if (typeof val.name !== 'undefined' && idx >= 1) {
-        //                        if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
-        //                            console.log(val.name + " <= " + array[idx-1].name);
-        //                        }
-        //                        (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
-        //                    }
-        //                });
-        //                done();
-        //            }
-        //        });
-        //    });
-        //});
+        describe('#getPetsSortedByName', function () {
+           this.timeout(500000); // this one takes longer than the others
+           it('should be sorted by name', function (done) {
+               client.get('/pet?sort=name', function (err, req, res, data) {
+                   if (err) {
+                       throw new Error(err);
+                   }
+                   else {
+                       data.should.have.length.above(1);
+                       _.forEach(data, function (val, idx, array) {
+                           if (typeof val.name !== 'undefined' && idx >= 1) {
+                               if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
+                                   console.log(val.name + " <= " + array[idx-1].name);
+                               }
+                               (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
+                           }
+                       });
+                       done();
+                   }
+               });
+           });
+        });
         describe('#deletePet', function () {
             this.timeout(timeout);
             it('should delete a pet', function (done) {
