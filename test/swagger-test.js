@@ -1,10 +1,3 @@
-// Blanket for code coverage
-require('blanket')({
-    pattern: function (filename) {
-        return !/node_modules/.test(filename);
-    }
-});
-
 (function () {
     "use strict";
     var restify = require('restify');
@@ -21,15 +14,16 @@ require('blanket')({
         //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-ssat.qualcomm.com/',
         //url: 'http://192.168.99.100:8080',
         //url: 'http://localhost:8080',
+        // Required for Jenkins CI/CD Build
         url: process.env.APPLICATION_HOSTNAME,
         headers: {Authorization: 'Basic dXNlcjpwYXNzd29yZA=='}
     });
 
     var timeout = 30000; //in ms
     describe('swagger-tests', function () {
-        describe('#createDeletePets', function () {
+        var petId;
+        describe('#createPet', function () {
             this.timeout(timeout);
-            var petId;
             it('should add a new pet', function (done) {
                 var json = {
                     "name": "freddie",
@@ -45,15 +39,6 @@ require('blanket')({
                         petId = result.id; // use to clean-up during delete
                         (result.name).should.equal(json.name);
                     }
-                    done();
-                });
-            });
-            it('should delete a pet', function (done) {
-                client.del('/pet/' + petId, function (err, req, res, data) {
-                    if (err) {
-                        throw new Error(err);
-                    }
-                    data.should.be.empty;
                     done();
                 });
             });
@@ -146,24 +131,36 @@ require('blanket')({
             });
         });
         describe('#getPetsSortedByName', function () {
-            this.timeout(500000); // this one takes longer than the others
-            it('should be sorted by name', function (done) {
-                client.get('/pet?sort=name', function (err, req, res, data) {
+           this.timeout(500000); // this one takes longer than the others
+           it('should be sorted by name', function (done) {
+               client.get('/pet?sort=name', function (err, req, res, data) {
+                   if (err) {
+                       throw new Error(err);
+                   }
+                   else {
+                       data.should.have.length.above(1);
+                       _.forEach(data, function (val, idx, array) {
+                           if (typeof val.name !== 'undefined' && idx >= 1) {
+                               if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
+                                   console.log(val.name + " <= " + array[idx-1].name);
+                               }
+                               (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
+                           }
+                       });
+                       done();
+                   }
+               });
+           });
+        });
+        describe('#deletePet', function () {
+            this.timeout(timeout);
+            it('should delete a pet', function (done) {
+                client.del('/pet/' + petId, function (err, req, res, data) {
                     if (err) {
                         throw new Error(err);
                     }
-                    else {
-                        data.should.have.length.above(1);
-                        _.forEach(data, function (val, idx, array) {
-                            if (typeof val.name !== 'undefined' && idx >= 1) {
-                                if (val.name.toLowerCase() < array[idx - 1].name.toLowerCase()) {
-                                    console.log(val.name + " <= " + array[idx-1].name);
-                                }
-                                (val.name.toLowerCase() >= array[idx - 1].name.toLowerCase()).should.be.true;
-                            }
-                        });
-                        done();
-                    }
+                    data.should.be.empty;
+                    done();
                 });
             });
         });

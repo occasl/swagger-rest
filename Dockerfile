@@ -1,4 +1,4 @@
-FROM nodesource/trusty:4.2.3
+FROM nodesource/trusty:4.4.0
 
 MAINTAINER Lou Sacco (lsacco@qualcomm.com)
 

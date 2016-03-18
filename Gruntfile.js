@@ -31,7 +31,7 @@
                             },
                             {
                                 pattern: /\$VERSION/g,
-                                replacement: '1.1.0'
+                                replacement: '1.2.0'
                             },
                             {
                                 pattern: /\$ID/g,
