@@ -37,7 +37,7 @@ import hudson.model.*
 stage "Initialize"
 node( MASTER_NODE ) {
     echo "Initializing workflow"
-//    deploySlave()
+    deploySlave()
 }
 
 // Teardown environment
