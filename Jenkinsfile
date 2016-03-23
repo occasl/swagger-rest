@@ -334,7 +334,7 @@ def dockerDeploy() {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
 //        image.push()
-            docker.build(APPLICATION_NAME).push('latest')
+            build(APPLICATION_NAME).push('latest')
         }
     } catch (e) {
         echo 'Docker Deploy Failed'
