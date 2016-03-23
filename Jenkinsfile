@@ -12,7 +12,7 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.4"
+@Field def DOCKER_SLAVE_TAG = "1.5"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
@@ -37,7 +37,7 @@ import hudson.model.*
 stage "Initialize"
 node( MASTER_NODE ) {
     echo "Initializing workflow"
-//    deploySlave()
+    deploySlave()
 }
 
 // Teardown environment
@@ -60,13 +60,13 @@ node( MASTER_NODE ) {
 stage "DEV Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to Develop"
-//    deployApp('dev')
+    deployApp('dev')
 }
 
 stage "Integration Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
-//    runTests('dev')
+    runTests('dev')
 }
 
 stage "Publish Docker Image"
@@ -77,6 +77,8 @@ node( SLAVE_NODE ) {
         which docker
         docker --version
         '''
+
+    git GITHUB_PROJECT
     withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
