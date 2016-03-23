@@ -1,8 +1,6 @@
 import groovy.transform.Field
 import hudson.model.*
 
-import org.jenkinsci.plugins.docker.workflow.Docker
-
 /*  ----------------
  *  Global variables
  *  ----------------
@@ -72,9 +70,14 @@ node( SLAVE_NODE ) {
 }
 
 stage "Publish Docker Image"
-node( SLAVE_NODE ) {
+node( MASTER_NODE ) {
     echo "Docker Publish"
-    dockerDeploy()
+    withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
+//        def image = docker.image(APPLICATION_NAME)
+//        image.tag("latest")
+//        image.push()
+        docker.build(APPLICATION_NAME).push('latest')
+    }
 }
 
 stage "QA Deploy"
