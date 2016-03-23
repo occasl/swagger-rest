@@ -72,7 +72,7 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-//    dockerDeploy()
+    dockerDeploy()
 }
 
 stage "QA Deploy"
@@ -329,14 +329,13 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    withEnv(['HOME='+pwd()]) {
-        docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
+    withDockerRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
 //        image.push()
-            docker.build(APPLICATION_NAME).push('latest')
-        }
+        docker.build(APPLICATION_NAME).push('latest')
     }
+
 }
 
 def joinNetwork(network, job) {
