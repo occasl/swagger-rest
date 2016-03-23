@@ -37,7 +37,7 @@ import hudson.model.*
 stage "Initialize"
 node( MASTER_NODE ) {
     echo "Initializing workflow"
-    deploySlave()
+//    deploySlave()
 }
 
 // Teardown environment
@@ -75,6 +75,7 @@ node( SLAVE_NODE ) {
     sh '''
         echo $HOME
         which docker
+        docker --version
         '''
     withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
 //        def image = docker.image(APPLICATION_NAME)
