@@ -72,6 +72,7 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( MASTER_NODE ) {
     echo "Docker Publish"
+    sh 'echo $HOME;which docker;docker version'
     withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
