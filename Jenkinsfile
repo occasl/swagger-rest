@@ -1,6 +1,8 @@
 import groovy.transform.Field
 import hudson.model.*
 
+import org.jenkinsci.plugins.docker.workflow.Docker
+
 /*  ----------------
  *  Global variables
  *  ----------------
@@ -37,7 +39,7 @@ import hudson.model.*
 stage "Initialize"
 node( MASTER_NODE ) {
     echo "Initializing workflow"
-    deploySlave()
+//    deploySlave()
 }
 
 // Teardown environment
@@ -60,13 +62,13 @@ node( MASTER_NODE ) {
 stage "DEV Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to Develop"
-    deployApp('dev')
+//    deployApp('dev')
 }
 
 stage "Integration Test"
 node( SLAVE_NODE ) {
     echo "Executing tests"
-    runTests('dev')
+//    runTests('dev')
 }
 
 stage "Publish Docker Image"
@@ -329,17 +331,17 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    try {
+//    try {
         withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
 //        image.push()
-            build(APPLICATION_NAME).push('latest')
+            docker.build(APPLICATION_NAME).push('latest')
         }
-    } catch (e) {
-        echo 'Docker Deploy Failed'
-        emailError()
-    }
+//    } catch (e) {
+//        echo 'Docker Deploy Failed'
+//        emailError()
+//    }
 
 }
 
