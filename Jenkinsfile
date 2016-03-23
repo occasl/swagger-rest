@@ -329,11 +329,16 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    withDockerRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
+    try {
+        withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
 //        def image = docker.image(APPLICATION_NAME)
 //        image.tag("latest")
 //        image.push()
-        docker.build(APPLICATION_NAME).push('latest')
+            docker.build(APPLICATION_NAME).push('latest')
+        }
+    } catch (e) {
+        echo 'Docker Deploy Failed'
+        emailError()
     }
 
 }
