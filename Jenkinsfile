@@ -12,7 +12,7 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.5"
+@Field def DOCKER_SLAVE_TAG = "1.4"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
@@ -175,7 +175,7 @@ def deploySlave() {
             export AWS_DEFAULT_REGION=$(aws configure get region)
 
             # create the slave Docker job in Apcera
-            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB --ignore-volumes --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 4 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
+            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB -v /var/run/docker.sock:/var/run/docker.sock --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 4 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
 
         '''
     }
@@ -195,14 +195,6 @@ def undeploySlave() {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
         echo 'Error leaving network'
-        emailError()
-    }
-
-    // stop the slave Docker job
-    try {
-        stopJob( APC_SLAVE_DOCKER_JOB_NAME )
-    } catch (e) {
-        echo 'Error stopping job'
         emailError()
     }
 
@@ -266,15 +258,7 @@ def deployApp(env) {
             echo "Deleting Job: " + $DELETE_JOB
             apc network leave ''' + APC_VIRTUAL_NETWORK + ''' --job $DELETE_JOB
             apc job stop $DELETE_JOB
-            expect -c '
-                spawn apc job delete $env(DELETE_JOB)
-                expect "Delete job *:"
-                send "y\r"
-                wait
-                expect "Success!"
-                close
-            '
-
+            apc job delete $env(DELETE_JOB) --batch
         fi
     '''
 
@@ -290,14 +274,6 @@ def undeployApp(env) {
         leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
     } catch (e) {
         echo 'Error leaving network'
-        emailError()
-    }
-
-    // stop the application Docker job
-    try {
-        stopJob( appDockerJobName )
-    } catch (e) {
-        echo 'Error stopping job'
         emailError()
     }
 
@@ -366,23 +342,9 @@ def leaveNetwork(network, job) {
     sh "apc network leave " + network + " --job " + job
 }
 
-def stopJob(job) {
-    echo "Stopping job ${job} in Apcera"
-    sh "apc app stop " + job
-}
-
 def deleteJob(job) {
     echo "Deleting job ${job} in Apcera"
-    sh '''
-        expect -c '
-    	    spawn apc app delete ''' + job + '''
-    	    expect "Delete application*:"
-    	    send "y\r"
-    	    wait
-    	    expect "Success!"
-    	    close
-        '
-    '''
+    sh "apc app delete ''' + job + ''' --batch"
 }
 
 def emailError() {
