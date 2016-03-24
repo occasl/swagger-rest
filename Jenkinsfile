@@ -258,7 +258,7 @@ def deployApp(env) {
             echo "Deleting Job: " + $DELETE_JOB
             apc network leave ''' + APC_VIRTUAL_NETWORK + ''' --job $DELETE_JOB
             apc job stop $DELETE_JOB
-            apc job delete $env(DELETE_JOB) --batch
+            apc job delete $DELETE_JOB --batch
         fi
     '''
 
