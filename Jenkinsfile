@@ -72,11 +72,6 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-    sh '''
-        echo $HOME
-        which docker
-        docker --version
-        '''
 
     git GITHUB_PROJECT
     withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
