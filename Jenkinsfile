@@ -72,14 +72,7 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-
-    git GITHUB_PROJECT
-    withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
-//        def image = docker.image(APPLICATION_NAME)
-//        image.tag("latest")
-//        image.push()
-        docker.build(APPLICATION_NAME).push('latest')
-    }
+    dockerDeploy()
 }
 
 stage "QA Deploy"
@@ -289,12 +282,8 @@ def runTests(env) {
     def appDomain = 'http://' + appName + APPLICATION_DOMAIN
 
     try {
+        git GITHUB_PROJECT
         sh '''
-            apc app connect ''' + SLAVE_NAME + '''
-            if [ ! -d swagger-rest ] ; then
-                git clone ''' + GITHUB_PROJECT + ''' --branch develop --single-branch
-            fi
-            cd swagger-rest
             npm config set registry="http://registry.npmjs.org/"
             npm install
             ./node_modules/grunt-cli/bin/grunt
@@ -313,12 +302,13 @@ def runTests(env) {
 
 def dockerDeploy() {
 //    try {
-        withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
-//        def image = docker.image(APPLICATION_NAME)
-//        image.tag("latest")
-//        image.push()
-            docker.build(APPLICATION_NAME).push('latest')
-        }
+            git GITHUB_PROJECT
+            withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
+        //        def image = docker.image(APPLICATION_NAME)
+        //        image.tag("latest")
+        //        image.push()
+                docker.build(APPLICATION_NAME).push('latest')
+            }
 //    } catch (e) {
 //        echo 'Docker Deploy Failed'
 //        emailError()
