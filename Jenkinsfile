@@ -276,7 +276,6 @@ def undeployApp(env) {
 }
 
 def runTests(env) {
-    connectApc()
     echo "Testing apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
     def appDomain = 'http://' + appName + APPLICATION_DOMAIN
@@ -301,7 +300,6 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    connectApc()
 //    try {
             git GITHUB_PROJECT
             withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
