@@ -301,6 +301,7 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
+    connectApc()
 //    try {
             git GITHUB_PROJECT
             withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
