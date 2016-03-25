@@ -5,19 +5,6 @@ import hudson.model.*
  *  Global variables
  *  ----------------
  */
-@Field def MASTER_NODE = "master"
-@Field def SLAVE_NODE = "slave"
-@Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
-@Field def APPLICATION_NAME = "swagger-rest"
-@Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
-@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
-@Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.5"
-@Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
-@Field def APC_VERSION = "0.28.2"
-@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
-@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
-@Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
 
 // Change these variables for your project
 
@@ -26,7 +13,21 @@ import hudson.model.*
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
+@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
+@Field def APPLICATION_NAME = "swagger-rest"
 
+// Standard Config
+@Field def MASTER_NODE = "master"
+@Field def SLAVE_NODE = "slave"
+@Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
+@Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
+@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
+@Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
+@Field def DOCKER_SLAVE_TAG = "1.5"
+@Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
+@Field def APC_VERSION = "0.28.2"
+@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
+@Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
 
 /*  ------------------
  *  Flow Orchestration
@@ -39,23 +40,6 @@ node( MASTER_NODE ) {
     echo "Initializing workflow"
     deploySlave()
 }
-
-// Teardown environment
-//stage "Teardown"
-//echo "Tearing down environments"
-//parallel undeployDEV: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('dev')
-//    }
-//}, undeployTEST: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('test')
-//    }
-//}, undeployPROD: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('prod')
-//    }
-//}, failFast: true
 
 stage "DEV Deploy"
 node( SLAVE_NODE ) {
@@ -72,6 +56,7 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
+    //TODO Fix Docker command issue
     dockerDeploy()
 }
 
@@ -106,6 +91,23 @@ node( MASTER_NODE ) {
             subject: "Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD",
             body: "Please go to ${env.BUILD_URL}.")
 }
+
+// Teardown environment Example using Parallel
+//stage "Teardown"
+//echo "Tearing down environments"
+//parallel undeployDEV: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('dev')
+//    }
+//}, undeployTEST: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('test')
+//    }
+//}, undeployPROD: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('prod')
+//    }
+//}, failFast: true
 
 /*  ----------------
  *  Helper Functions
@@ -300,7 +302,7 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-//    try {
+    try {
             git GITHUB_PROJECT
             withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
         //        def image = docker.image(APPLICATION_NAME)
@@ -308,10 +310,10 @@ def dockerDeploy() {
         //        image.push()
                 docker.build(APPLICATION_NAME).push('latest')
             }
-//    } catch (e) {
-//        echo 'Docker Deploy Failed'
-//        emailError()
-//    }
+    } catch (e) {
+        echo 'Docker Deploy Failed'
+        emailError()
+    }
 
 }
 
