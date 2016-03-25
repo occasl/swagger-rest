@@ -12,7 +12,7 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.4"
+@Field def DOCKER_SLAVE_TAG = "1.5"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
