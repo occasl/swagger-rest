@@ -163,7 +163,7 @@ def deploySlave() {
             export AWS_DEFAULT_REGION=$(aws configure get region)
 
             # create the slave Docker job in Apcera
-            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB --provider /runq/providers/qual::sd-nfs -v /var/run/docker.sock:/var/run/docker.sock --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 3 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
+            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB --ignore-volumes --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 3 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
 
         '''
     }
