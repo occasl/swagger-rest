@@ -302,18 +302,21 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    try {
-            git GITHUB_PROJECT
+//    try {
+        git GITHUB_PROJECT
+
+        withDockerServer(server: [uri: 'http://docker-machine.qualcomm.com:4243']) {
             withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
-        //        def image = docker.image(APPLICATION_NAME)
-        //        image.tag("latest")
-        //        image.push()
+                //        def image = docker.image(APPLICATION_NAME)
+                //        image.tag("latest")
+                //        image.push()
                 docker.build(APPLICATION_NAME).push('latest')
             }
-    } catch (e) {
-        echo 'Docker Deploy Failed'
-        emailError()
-    }
+        }
+//    } catch (e) {
+//        echo 'Docker Deploy Failed'
+//        emailError()
+//    }
 
 }
 
