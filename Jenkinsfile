@@ -307,7 +307,7 @@ def dockerDeploy() {
         git GITHUB_PROJECT
 
         docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
-            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', LSACCO_CREDENTIALS_ID) {
+            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest') {
                 //        def image = docker.image(APPLICATION_NAME)
                 //        image.tag("latest")
                 //        image.push()
