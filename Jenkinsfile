@@ -306,12 +306,26 @@ def dockerDeploy() {
 //    try {
         git GITHUB_PROJECT
 
-        docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
-            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest') {
-                //        def image = docker.image(APPLICATION_NAME)
-                //        image.tag("latest")
-                //        image.push()
-                docker.build(APPLICATION_NAME).push('latest')
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: LSACCO_CREDENTIALS_ID,
+                          usernameVariable: 'UNAME', passwordVariable: 'PWD']]) {
+            docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
+                def appName = APPLICATION_NAME
+                def image = docker.build(appName, '.')
+
+                def container = image.run('--name ' + appName)
+
+                def builder = new groovy.json.JsonBuilder()
+                def cred = builder {
+                    username: env.UNAME
+                    password: env.PWD
+                    email: EMAIL_PROJECT
+                    serveraddress: DOCKER_APPLICATION_IMAGE
+                    auth: ""
+                }
+
+                docker.withRegistry(DOCKER_APPLICATION_IMAGE, cred ) {
+                    image.push('latest')
+                }
             }
         }
 //    } catch (e) {
