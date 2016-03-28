@@ -312,18 +312,18 @@ def dockerDeploy() {
                 def appName = APPLICATION_NAME
                 def image = docker.build(appName, '.')
 
-                def container = image.run('--name ' + appName)
+//                def container = image.run('--name ' + appName)
+//                container.stop()
 
-                def builder = new groovy.json.JsonBuilder()
-                def cred = builder {
-                    username: env.UNAME
-                    password: env.PWD
-                    email: EMAIL_PROJECT
-                    serveraddress: DOCKER_APPLICATION_IMAGE
-                    auth: ""
-                }
+//                def cred =  {
+//                    username: env.UNAME
+//                    password: env.PWD
+//                    email: EMAIL_PROJECT
+//                    serveraddress: DOCKER_APPLICATION_IMAGE
+//                    auth: ""
+//                }
 
-                docker.withRegistry(DOCKER_APPLICATION_IMAGE, cred ) {
+                docker.withRegistry(DOCKER_APPLICATION_IMAGE, LSACCO_CREDENTIALS_ID ) {
                     image.push('latest')
                 }
             }
