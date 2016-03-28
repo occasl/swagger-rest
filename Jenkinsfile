@@ -13,6 +13,7 @@ import hudson.model.*
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
+@Field def LSACCO_CREDENTIALS_ID = "apc-lsacco"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
 @Field def APPLICATION_NAME = "swagger-rest"
 
@@ -306,7 +307,7 @@ def dockerDeploy() {
         git GITHUB_PROJECT
 
         docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
-            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
+            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', LSACCO_CREDENTIALS_ID) {
                 //        def image = docker.image(APPLICATION_NAME)
                 //        image.tag("latest")
                 //        image.push()
