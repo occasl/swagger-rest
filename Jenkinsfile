@@ -305,8 +305,8 @@ def dockerDeploy() {
 //    try {
         git GITHUB_PROJECT
 
-        withDockerServer(server: [uri: 'http://docker-machine.qualcomm.com:4243']) {
-            withDockerRegistry(registry:[url:'https://docker-registry.qualcomm.com/lsacco/swagger-rest', credentialsId: SSATSVC_CREDENTIALS_ID]) {
+        docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
+            docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
                 //        def image = docker.image(APPLICATION_NAME)
                 //        image.tag("latest")
                 //        image.push()
