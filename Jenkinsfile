@@ -5,28 +5,31 @@ import hudson.model.*
  *  Global variables
  *  ----------------
  */
+
+// Change these variables for your project
+@Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
+@Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
+@Field def APPLICATION_NAME = "swagger-rest"
+@Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
+@Field def DOCKER_APPLICATION_TAG = "latest"
+@Field def DOCKER_CONTAINER_NAME = APPLICATION_NAME + "_" + System.currentTimeMillis()
+@Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
+@Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
+@Field def QUAY_CREDENTIALS_ID = "apc-quay"
+@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
+
+// Standard Config
 @Field def MASTER_NODE = "master"
 @Field def SLAVE_NODE = "slave"
 @Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
-@Field def APPLICATION_NAME = "swagger-rest"
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
-@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
+@Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.4"
+@Field def DOCKER_SLAVE_TAG = "1.5" // Must use slave with docker.io installed
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
-@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
 @Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
 @Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
-
-// Change these variables for your project
-
-@Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
-@Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
-@Field def DOCKER_APPLICATION_TAG = "latest"
-@Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
-@Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
-
 
 /*  ------------------
  *  Flow Orchestration
@@ -39,23 +42,6 @@ node( MASTER_NODE ) {
     echo "Initializing workflow"
     deploySlave()
 }
-
-// Teardown environment
-//stage "Teardown"
-//echo "Tearing down environments"
-//parallel undeployDEV: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('dev')
-//    }
-//}, undeployTEST: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('test')
-//    }
-//}, undeployPROD: {
-//    node( SLAVE_NODE ) {
-//        undeployApp('prod')
-//    }
-//}, failFast: true
 
 stage "DEV Deploy"
 node( SLAVE_NODE ) {
@@ -72,7 +58,7 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-//    dockerDeploy()
+    dockerDeploy()
 }
 
 stage "QA Deploy"
@@ -81,20 +67,28 @@ node( SLAVE_NODE ) {
     deployApp('test')
 }
 
+def deployed = true
 stage "PROD Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to PROD"
-    mail (to: EMAIL_PROJECT,
-            subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is ready to deploy to PROD",
-            body: "Please go to ${env.BUILD_URL}.")
-    input 'Deploy to Production?'
-    deployApp('prod')
+    emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Ready to deploy to PROD")
+    try {
+        timeout(time: 1, unit: 'DAYS') {
+            input 'Deploy to Production?'
+        }
+        deployApp('prod')
+    } catch (e) {
+        // Set to false so slave can be decommissioned in stage below
+        deployed = false
+    }
 }
 
-stage "Smoke Test"
-node( SLAVE_NODE ) {
-    echo "Executing PROD Smoke tests"
-    runTests('prod')
+if (deployed) {
+    stage "Smoke Test"
+    node(SLAVE_NODE) {
+        echo "Executing PROD Smoke tests"
+        runTests('prod')
+    }
 }
 
 // Finalize
@@ -102,10 +96,29 @@ stage "Finalize"
 node( MASTER_NODE ) {
     echo "Finalizing workflow job"
     undeploySlave()
-    mail (to: EMAIL_PROJECT,
-            subject: "Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD",
-            body: "Please go to ${env.BUILD_URL}.")
+    if (deployed) {
+        emailNotification("Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD")
+    } else {
+        emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Not deployed to PROD")
+    }
 }
+
+// Teardown environment Example using parallel keyword
+//stage "Teardown"
+//echo "Tearing down environments"
+//parallel undeployDEV: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('dev')
+//    }
+//}, undeployTEST: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('test')
+//    }
+//}, undeployPROD: {
+//    node( SLAVE_NODE ) {
+//        undeployApp('prod')
+//    }
+//}, failFast: true
 
 /*  ----------------
  *  Helper Functions
@@ -163,7 +176,7 @@ def deploySlave() {
             export AWS_DEFAULT_REGION=$(aws configure get region)
 
             # create the slave Docker job in Apcera
-            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB --ignore-volumes --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 4 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
+            apc docker create ''' + SLAVE_NAME + ''' --image ''' + DOCKER_SLAVE_IMAGE + ''' --tag ''' + DOCKER_SLAVE_TAG + ''' --disk 400MB --memory 1GB --ignore-volumes --allow-egress --env-set "JENKINS_PORT_8080_TCP_ADDR=$jenkins_master_ip" --env-set "JENKINS_PORT_8080_TCP_PORT=8080" --env-set "PARAMS=-name ''' + SLAVE_NAME + '''  -labels ''' + SLAVE_NODE + ''' -executors 3 -username ''' + env.SSATSVC_USERNAME + ''' -password ''' + env.SSATSVC_PASSWORD +''' "
 
         '''
     }
@@ -183,14 +196,6 @@ def undeploySlave() {
         leaveNetwork( APC_VIRTUAL_NETWORK, APC_SLAVE_DOCKER_JOB_NAME )
     } catch (e) {
         echo 'Error leaving network'
-        emailError()
-    }
-
-    // stop the slave Docker job
-    try {
-        stopJob( APC_SLAVE_DOCKER_JOB_NAME )
-    } catch (e) {
-        echo 'Error stopping job'
         emailError()
     }
 
@@ -254,64 +259,21 @@ def deployApp(env) {
             echo "Deleting Job: " + $DELETE_JOB
             apc network leave ''' + APC_VIRTUAL_NETWORK + ''' --job $DELETE_JOB
             apc job stop $DELETE_JOB
-            expect -c '
-                spawn apc job delete $env(DELETE_JOB)
-                expect "Delete job *:"
-                send "y\r"
-                wait
-                expect "Success!"
-                close
-            '
-
+            apc job delete $DELETE_JOB --batch
         fi
     '''
 
 }
 
-def undeployApp(env) {
-    echo "Undeploying apps on " + env
-    def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
-    def appDockerJobName = APC_NAMESPACE + "::" + appName
-
-    // remove the application from Apcera virtual network
-    try {
-        leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
-    } catch (e) {
-        echo 'Error leaving network'
-        emailError()
-    }
-
-    // stop the application Docker job
-    try {
-        stopJob( appDockerJobName )
-    } catch (e) {
-        echo 'Error stopping job'
-        emailError()
-    }
-
-    // delete the application Docker Job
-    try {
-        deleteJob( appDockerJobName )
-    } catch (e) {
-        echo 'Error deleting job'
-        emailError()
-
-    }
-}
-
 def runTests(env) {
-    connectApc()
     echo "Testing apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
     def appDomain = 'http://' + appName + APPLICATION_DOMAIN
 
+    // Use try/catch if you want to continue with notification only even if tests fail
     try {
+        git GITHUB_PROJECT
         sh '''
-            apc app connect ''' + SLAVE_NAME + '''
-            if [ ! -d swagger-rest ] ; then
-                git clone ''' + GITHUB_PROJECT + ''' --branch develop --single-branch
-            fi
-            cd swagger-rest
             npm config set registry="http://registry.npmjs.org/"
             npm install
             ./node_modules/grunt-cli/bin/grunt
@@ -321,7 +283,6 @@ def runTests(env) {
         '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
-
     } catch (e) {
         echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
         emailError()
@@ -329,12 +290,17 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-    withEnv(['HOME='+pwd()]) {
-        docker.withRegistry('https://docker-registry.qualcomm.com/lsacco/swagger-rest', SSATSVC_CREDENTIALS_ID) {
-//        def image = docker.image(APPLICATION_NAME)
-//        image.tag("latest")
-//        image.push()
-            docker.build(APPLICATION_NAME).push('latest')
+    git GITHUB_PROJECT
+
+    docker.withServer(DOCKER_MACHINE_HOSTNAME) {
+        def image = docker.build(DOCKER_TAG, '.')
+
+        // Test container then stop and remove it
+        def container = image.run('--name ' + DOCKER_CONTAINER_NAME)
+        container.stop()
+
+        docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
+            image.push(DOCKER_APPLICATION_TAG)
         }
     }
 }
@@ -350,25 +316,16 @@ def leaveNetwork(network, job) {
     sh "apc network leave " + network + " --job " + job
 }
 
-def stopJob(job) {
-    echo "Stopping job ${job} in Apcera"
-    sh "apc app stop " + job
-}
-
 def deleteJob(job) {
     echo "Deleting job ${job} in Apcera"
-    sh '''
-        expect -c '
-    	    spawn apc app delete ''' + job + '''
-    	    expect "Delete application*:"
-    	    send "y\r"
-    	    wait
-    	    expect "Success!"
-    	    close
-        '
-    '''
+    sh "apc app delete ''' + job + ''' --batch"
 }
 
+def emailNotification(msg) {
+    mail (to: EMAIL_PROJECT,
+            subject: "${msg}",
+            body: "Please go to ${env.BUILD_URL}.")
+}
 def emailError() {
     mail (to: EMAIL_PROJECT,
             subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
