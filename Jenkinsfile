@@ -83,9 +83,10 @@ node( SLAVE_NODE ) {
     }
 }
 
-if (deployed) {
-    stage "Smoke Test"
-    node(SLAVE_NODE) {
+stage "Smoke Test"
+node(SLAVE_NODE) {
+    // Skip smoke tests if not deployed
+    if (deployed) {
         echo "Executing PROD Smoke tests"
         runTests('prod')
     }
@@ -326,6 +327,7 @@ def emailNotification(msg) {
             subject: "${msg}",
             body: "Please go to ${env.BUILD_URL}.")
 }
+
 def emailError() {
     mail (to: EMAIL_PROJECT,
             subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
