@@ -70,8 +70,16 @@ stage "PROD Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to PROD"
     emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Ready to deploy to PROD")
-    input 'Deploy to Production?'
-    deployApp('prod')
+    try {
+        input 'Deploy to Production?'
+        deployApp('prod')
+    } catch (e) {
+        emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Not deployed to PROD")
+
+        node( MASTER_NODE ) {
+            undeploySlave()
+        }
+    }
 }
 
 stage "Smoke Test"
@@ -268,7 +276,6 @@ def runTests(env) {
         '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
-
     } catch (e) {
         echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
         emailError()
@@ -284,6 +291,7 @@ def dockerDeploy() {
         // Test container then stop it
         def container = image.run('--name ' + APPLICATION_NAME)
         container.stop()
+        container.rm()
 
         docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
             image.push(DOCKER_APPLICATION_TAG)
