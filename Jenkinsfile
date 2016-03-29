@@ -7,16 +7,15 @@ import hudson.model.*
  */
 
 // Change these variables for your project
-
 @Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
 @Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
+@Field def APPLICATION_NAME = "swagger-rest"
+@Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
-@Field def APPLICATION_NAME = "swagger-rest"
-@Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
 
 // Standard Config
 @Field def MASTER_NODE = "master"
@@ -58,7 +57,6 @@ node( SLAVE_NODE ) {
 stage "Publish Docker Image"
 node( SLAVE_NODE ) {
     echo "Docker Publish"
-    //TODO Fix Docker command issue
     dockerDeploy()
 }
 
@@ -71,9 +69,7 @@ node( SLAVE_NODE ) {
 stage "PROD Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to PROD"
-    mail (to: EMAIL_PROJECT,
-            subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is ready to deploy to PROD",
-            body: "Please go to ${env.BUILD_URL}.")
+    emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Ready to deploy to PROD")
     input 'Deploy to Production?'
     deployApp('prod')
 }
@@ -89,12 +85,10 @@ stage "Finalize"
 node( MASTER_NODE ) {
     echo "Finalizing workflow job"
     undeploySlave()
-    mail (to: EMAIL_PROJECT,
-            subject: "Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD",
-            body: "Please go to ${env.BUILD_URL}.")
+    emailNotification("Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD")
 }
 
-// Teardown environment Example using Parallel
+// Teardown environment Example using parallel keyword
 //stage "Teardown"
 //echo "Tearing down environments"
 //parallel undeployDEV: {
@@ -256,35 +250,13 @@ def deployApp(env) {
 
 }
 
-def undeployApp(env) {
-    echo "Undeploying apps on " + env
-    def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
-    def appDockerJobName = APC_NAMESPACE + "::" + appName
-
-    // remove the application from Apcera virtual network
-    try {
-        leaveNetwork( APC_VIRTUAL_NETWORK, appDockerJobName )
-    } catch (e) {
-        echo 'Error leaving network'
-        emailError()
-    }
-
-    // delete the application Docker Job
-    try {
-        deleteJob( appDockerJobName )
-    } catch (e) {
-        echo 'Error deleting job'
-        emailError()
-
-    }
-}
-
 def runTests(env) {
     echo "Testing apps on " + env
     def appName = (env == 'prod' ? APPLICATION_NAME : APPLICATION_NAME + '-' + env)
     def appDomain = 'http://' + appName + APPLICATION_DOMAIN
 
-    try {
+    // Use try/catch if you want to continue with notification only even if tests fail
+//    try {
         git GITHUB_PROJECT
         sh '''
             npm config set registry="http://registry.npmjs.org/"
@@ -297,10 +269,10 @@ def runTests(env) {
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
 
-    } catch (e) {
-        echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
-        emailError()
-    }
+//    } catch (e) {
+//        echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
+//        emailError()
+//    }
 }
 
 def dockerDeploy() {
@@ -310,7 +282,7 @@ def dockerDeploy() {
         def image = docker.build(DOCKER_TAG, '.')
 
         // Test container then stop it
-        def container = image.run('--name ' + DOCKER_TAG)
+        def container = image.run('--name ' + APPLICATION_NAME)
         container.stop()
 
         docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
@@ -335,6 +307,11 @@ def deleteJob(job) {
     sh "apc app delete ''' + job + ''' --batch"
 }
 
+def emailNotification(msg) {
+    mail (to: EMAIL_PROJECT,
+            subject: "${msg}",
+            body: "Please go to ${env.BUILD_URL}.")
+}
 def emailError() {
     mail (to: EMAIL_PROJECT,
             subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
