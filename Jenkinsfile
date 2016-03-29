@@ -16,7 +16,7 @@ import hudson.model.*
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
 @Field def APPLICATION_NAME = "swagger-rest"
-@Field def DOCKER_TAG = "docker-registry.qualcomm.com/lsacco/" + APPLICATION_NAME
+@Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
 
 // Standard Config
 @Field def MASTER_NODE = "master"
