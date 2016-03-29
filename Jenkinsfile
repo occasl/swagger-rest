@@ -319,7 +319,7 @@ def leaveNetwork(network, job) {
 
 def deleteJob(job) {
     echo "Deleting job ${job} in Apcera"
-    sh "apc app delete ''' + job + ''' --batch"
+    sh "apc app delete " + job + " --batch"
 }
 
 def emailNotification(msg) {
