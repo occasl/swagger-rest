@@ -25,7 +25,7 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.4"
+@Field def DOCKER_SLAVE_TAG = "1.5" // Must use slave with docker.io installed
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
