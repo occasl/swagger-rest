@@ -23,6 +23,7 @@ import hudson.model.*
 @Field def SLAVE_NODE = "slave"
 @Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
+@Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
 @Field def DOCKER_SLAVE_TAG = "1.5"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
@@ -303,24 +304,19 @@ def runTests(env) {
 }
 
 def dockerDeploy() {
-//    try {
-        git GITHUB_PROJECT
+    git GITHUB_PROJECT
 
-            docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
-                def image = docker.build(DOCKER_TAG, '.')
+    docker.withServer(DOCKER_MACHINE_HOSTNAME) {
+        def image = docker.build(DOCKER_TAG, '.')
 
-//                def container = image.run('--name ' + appName)
-//                container.stop()
+        // Test container then stop it
+        def container = image.run('--name ' + DOCKER_TAG)
+        container.stop()
 
-                docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
-                    image.push('latest')
-                }
-            }
-//    } catch (e) {
-//        echo 'Docker Deploy Failed'
-//        emailError()
-//    }
-
+        docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
+            image.push(DOCKER_APPLICATION_TAG)
+        }
+    }
 }
 
 def joinNetwork(network, job) {
