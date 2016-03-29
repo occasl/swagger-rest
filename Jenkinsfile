@@ -12,6 +12,7 @@ import hudson.model.*
 @Field def APPLICATION_NAME = "swagger-rest"
 @Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
 @Field def DOCKER_APPLICATION_TAG = "latest"
+@Field def DOCKER_CONTAINER_NAME = APPLICATION_NAME + "_" + System.currentTimeMillis()
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
@@ -289,7 +290,7 @@ def dockerDeploy() {
         def image = docker.build(DOCKER_TAG, '.')
 
         // Test container then stop and remove it
-        def container = image.run('--name ' + APPLICATION_NAME + "_" + System.currentTimeMillis())
+        def container = image.run('--name ' + DOCKER_CONTAINER_NAME)
         container.stop()
 //        container.rm()
 
