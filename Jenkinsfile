@@ -25,7 +25,7 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.5"
+@Field def DOCKER_SLAVE_TAG = "1.4"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
@@ -67,26 +67,28 @@ node( SLAVE_NODE ) {
     deployApp('test')
 }
 
+def deployed = true
 stage "PROD Deploy"
 node( SLAVE_NODE ) {
     echo "Deploying to PROD"
     emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Ready to deploy to PROD")
     try {
-        input 'Deploy to Production?'
+        timeout(time: 1, unit: 'DAYS') {
+            input 'Deploy to Production?'
+        }
         deployApp('prod')
     } catch (e) {
-        emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Not deployed to PROD")
-
-        node( MASTER_NODE ) {
-            undeploySlave()
-        }
+        // Set to false so slave can be decommissioned in stage below
+        deployed = false
     }
 }
 
-stage "Smoke Test"
-node( SLAVE_NODE ) {
-    echo "Executing PROD Smoke tests"
-    runTests('prod')
+if (deployed) {
+    stage "Smoke Test"
+    node(SLAVE_NODE) {
+        echo "Executing PROD Smoke tests"
+        runTests('prod')
+    }
 }
 
 // Finalize
@@ -94,7 +96,11 @@ stage "Finalize"
 node( MASTER_NODE ) {
     echo "Finalizing workflow job"
     undeploySlave()
-    emailNotification("Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD")
+    if (deployed) {
+        emailNotification("Deployed Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) to PROD")
+    } else {
+        emailNotification("Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}): Not deployed to PROD")
+    }
 }
 
 // Teardown environment Example using parallel keyword
@@ -292,7 +298,6 @@ def dockerDeploy() {
         // Test container then stop and remove it
         def container = image.run('--name ' + DOCKER_CONTAINER_NAME)
         container.stop()
-//        container.rm()
 
         docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
             image.push(DOCKER_APPLICATION_TAG)
