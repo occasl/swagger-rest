@@ -10,10 +10,11 @@ import hudson.model.*
 
 @Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
 @Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
+@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com/repository/lsacco/swagger-rest"
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
-@Field def LSACCO_CREDENTIALS_ID = "apc-lsacco"
+@Field def QUAY_CREDENTIALS_ID = "apc-quay"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
 @Field def APPLICATION_NAME = "swagger-rest"
 
@@ -22,7 +23,6 @@ import hudson.model.*
 @Field def SLAVE_NODE = "slave"
 @Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
-@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
 @Field def DOCKER_SLAVE_TAG = "1.5"
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
@@ -306,8 +306,6 @@ def dockerDeploy() {
 //    try {
         git GITHUB_PROJECT
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: LSACCO_CREDENTIALS_ID,
-                          usernameVariable: 'UNAME', passwordVariable: 'PWD']]) {
             docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
                 def appName = APPLICATION_NAME
                 def image = docker.build(appName, '.')
@@ -323,11 +321,10 @@ def dockerDeploy() {
 //                    auth: ""
 //                }
 
-                docker.withRegistry(DOCKER_APPLICATION_IMAGE, LSACCO_CREDENTIALS_ID ) {
+                docker.withRegistry(DOCKER_REGISTRY, QUAY_CREDENTIALS_ID ) {
                     image.push('latest')
                 }
             }
-        }
 //    } catch (e) {
 //        echo 'Docker Deploy Failed'
 //        emailError()
