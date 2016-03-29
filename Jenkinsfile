@@ -288,10 +288,10 @@ def dockerDeploy() {
     docker.withServer(DOCKER_MACHINE_HOSTNAME) {
         def image = docker.build(DOCKER_TAG, '.')
 
-        // Test container then stop it
-        def container = image.run('--name ' + APPLICATION_NAME)
+        // Test container then stop and remove it
+        def container = image.run('--name ' + APPLICATION_NAME + "_" + System.currentTimeMillis())
         container.stop()
-        container.rm()
+//        container.rm()
 
         docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
             image.push(DOCKER_APPLICATION_TAG)
