@@ -10,7 +10,6 @@ import hudson.model.*
 
 @Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
 @Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
-@Field def DOCKER_REGISTRY = "https://docker-registry.qualcomm.com/repository/lsacco/swagger-rest"
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
@@ -321,7 +320,7 @@ def dockerDeploy() {
 //                    auth: ""
 //                }
 
-                docker.withRegistry(DOCKER_REGISTRY, QUAY_CREDENTIALS_ID ) {
+                docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
                     image.push('latest')
                 }
             }
