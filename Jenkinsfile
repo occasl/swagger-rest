@@ -16,6 +16,7 @@ import hudson.model.*
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
 @Field def APPLICATION_NAME = "swagger-rest"
+@Field def DOCKER_TAG = "docker-registry.qualcomm.com/lsacco/" + APPLICATION_NAME
 
 // Standard Config
 @Field def MASTER_NODE = "master"
@@ -306,19 +307,10 @@ def dockerDeploy() {
         git GITHUB_PROJECT
 
             docker.withServer('tcp://docker-machine.qualcomm.com:4243') {
-                def appName = APPLICATION_NAME
-                def image = docker.build(appName, '.')
+                def image = docker.build(DOCKER_TAG, '.')
 
 //                def container = image.run('--name ' + appName)
 //                container.stop()
-
-//                def cred =  {
-//                    username: env.UNAME
-//                    password: env.PWD
-//                    email: EMAIL_PROJECT
-//                    serveraddress: DOCKER_APPLICATION_IMAGE
-//                    auth: ""
-//                }
 
                 docker.withRegistry(DOCKER_APPLICATION_IMAGE, QUAY_CREDENTIALS_ID ) {
                     image.push('latest')
