@@ -28,7 +28,7 @@ import hudson.model.*
 @Field def DOCKER_SLAVE_TAG = "1.6" // Must use slave with docker.io installed
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
-@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
+@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-apc-network"
 @Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
 
 /*  ------------------
