@@ -13,7 +13,7 @@
         version: '1.0.0',
         //url: 'http://swagger-rest.lsacco.sandbox.runq.runq-ssat.qualcomm.com/',
         //url: 'http://192.168.99.100:8080',
-        //url: 'http://localhost:8080',
+        // url: 'http://localhost:8080',
         // Required for Jenkins CI/CD Build
         url: process.env.APPLICATION_HOSTNAME,
         headers: {Authorization: 'Basic dXNlcjpwYXNzd29yZA=='}
@@ -160,6 +160,18 @@
                         throw new Error(err);
                     }
                     data.should.be.empty;
+                    done();
+                });
+            });
+        });
+        describe('#invalidAuthentication', function () {
+            this.timeout(timeout);
+            it('should not authenticate', function (done) {
+                client.headers = "";
+                client.get('/pet?status=available,pending,sold', function (err, req, res, data) {
+                    if (err) {
+                        err.message.should.equal("Authentication failure");
+                    }
                     done();
                 });
             });
