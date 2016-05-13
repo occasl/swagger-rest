@@ -16,7 +16,7 @@ import hudson.model.*
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
-@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
+@Field def APC_NAMESPACE = "/runq/team/runq-apc-jenkins/qual"
 
 // Standard Config
 @Field def MASTER_NODE = "master"
