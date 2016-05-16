@@ -280,12 +280,13 @@ def runTests(env) {
             ./node_modules/grunt-cli/bin/grunt
             export APPLICATION_HOSTNAME=''' + appDomain + '''
             export MOCHA_FILE=./jenkins-test-results.xml
-            ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter
+            ./node_modules/.bin/_mocha test/** --reporter mocha-junit-reporter
         '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
     } catch (e) {
-        echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
+        def msg = 'Error running tests (do you have the right APPLICATION_HOSTNAME set?) : ' + e.stack
+        echo msg
         emailError()
     }
 }
