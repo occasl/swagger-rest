@@ -282,8 +282,8 @@ def runTests(env) {
             export MOCHA_FILE=./jenkins-test-results.xml
             ./node_modules/.bin/mocha test/swagger-test.js --reporter mocha-junit-reporter > test-reports.xml
         '''
-        archive 'jenkins-test-results.xml'
-        step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
+        step ([$class: 'ArtifactArchiver', artifacts: 'jenkins-test-results.xml', fingerprint:true])
+        step ([$class: 'JUnitResultArchiver', testResults: '**/*.xml'])
     } catch (e) {
         def msg = 'Error running tests (do you have the right APPLICATION_HOSTNAME set?) : ' + e.stack
         echo msg
