@@ -280,14 +280,14 @@ def runTests(env) {
             ./node_modules/grunt-cli/bin/grunt
             export APPLICATION_HOSTNAME=''' + appDomain + '''
             export MOCHA_FILE=./jenkins-test-results.xml
-            ./node_modules/.bin/_mocha test/** --reporter mocha-junit-reporter
+            ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter > test-reports.xml
         '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
     } catch (e) {
         def msg = 'Error running tests (do you have the right APPLICATION_HOSTNAME set?) : ' + e.stack
         echo msg
-        emailError()
+        emailError(msg)
     }
 }
 
@@ -329,8 +329,8 @@ def emailNotification(msg) {
             body: "Please go to ${env.BUILD_URL}.")
 }
 
-def emailError() {
+def emailError(msg) {
     mail (to: EMAIL_PROJECT,
             subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
-            body: "Please go to ${env.BUILD_URL}.")
+            body: "Please go to ${env.BUILD_URL}: " + msg)
 }
