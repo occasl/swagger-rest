@@ -273,14 +273,14 @@ def runTests(env) {
 
     // Use try/catch if you want to continue with notification only even if tests fail
     try {
-        git GITHUB_PROJECT
+        git GITHUB_PROJECT -b develop
         sh '''
             npm config set registry="http://registry.npmjs.org/"
             npm install
             ./node_modules/grunt-cli/bin/grunt
             export APPLICATION_HOSTNAME=''' + appDomain + '''
             export MOCHA_FILE=./jenkins-test-results.xml
-            ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter > test-reports.xml
+            ./node_modules/.bin/mocha test/swagger-test.js --reporter mocha-junit-reporter > test-reports.xml
         '''
         archive 'jenkins-test-results.xml'
         step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
