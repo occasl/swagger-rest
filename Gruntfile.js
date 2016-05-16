@@ -8,7 +8,7 @@
                 build: {
                     files: [
                         {
-                            src: ['./**/*.js', './*.json', './README.md', 'config/*.json', '.ebextensions/*', '.elasticbeanstalk/*', '!./nunit.js', '!./test/**/*', '!./dist/**/*', '!./node_modules/**/*', '!./Gruntfile.js', 'conf/*', 'Dockerfile', 'continuum.conf'],
+                            src: ['./**/*.js', './*.json', './README.md', 'config/*.json', '.ebextensions/*', '.elasticbeanstalk/*', '!./nunit.js', '!./test/**/*', '!./dist/**/*', '!./node_modules/**/*', '!./Gruntfile.js', '!./coverage/**/*', 'conf/*', 'Dockerfile', 'continuum.conf'],
                             dest: 'dist/'
                         }
                     ]

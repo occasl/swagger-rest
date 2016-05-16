@@ -16,7 +16,7 @@ import hudson.model.*
 @Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
-@Field def APC_NAMESPACE = "/runq/team/runq-apc-ssat/qual"
+@Field def APC_NAMESPACE = "/runq/team/runq-apc-jenkins/qual"
 
 // Standard Config
 @Field def MASTER_NODE = "master"
@@ -25,10 +25,10 @@ import hudson.model.*
 @Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
 @Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
 @Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
-@Field def DOCKER_SLAVE_TAG = "1.5" // Must use slave with docker.io installed
+@Field def DOCKER_SLAVE_TAG = "1.6" // Must use slave with docker.io installed
 @Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
 @Field def APC_VERSION = "0.28.2"
-@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-network"
+@Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-apc-network"
 @Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
 
 /*  ------------------
@@ -273,20 +273,21 @@ def runTests(env) {
 
     // Use try/catch if you want to continue with notification only even if tests fail
     try {
-        git GITHUB_PROJECT
+        git ([url: GITHUB_PROJECT, branch: 'develop'])
         sh '''
             npm config set registry="http://registry.npmjs.org/"
             npm install
             ./node_modules/grunt-cli/bin/grunt
             export APPLICATION_HOSTNAME=''' + appDomain + '''
             export MOCHA_FILE=./jenkins-test-results.xml
-            ./node_modules/.bin/mocha test/** --reporter mocha-junit-reporter
+            ./node_modules/.bin/mocha test/swagger-test.js --reporter mocha-junit-reporter > test-reports.xml
         '''
-        archive 'jenkins-test-results.xml'
-        step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: '**/*.xml'
+        step ([$class: 'ArtifactArchiver', artifacts: 'jenkins-test-results.xml', fingerprint:true])
+        step ([$class: 'JUnitResultArchiver', testResults: '**/*.xml'])
     } catch (e) {
-        echo 'Error running tests (do you have the right APPLICATION_HOSTNAME set?)'
-        emailError()
+        def msg = 'Error running tests (do you have the right APPLICATION_HOSTNAME set?) : ' + e.stack
+        echo msg
+        emailError(msg)
     }
 }
 
@@ -328,8 +329,8 @@ def emailNotification(msg) {
             body: "Please go to ${env.BUILD_URL}.")
 }
 
-def emailError() {
+def emailError(msg) {
     mail (to: EMAIL_PROJECT,
             subject: "ERROR in Job '${env.JOB_NAME}' (${env.BUILD_NUMBER})",
-            body: "Please go to ${env.BUILD_URL}.")
+            body: "Please go to ${env.BUILD_URL}: " + msg)
 }
