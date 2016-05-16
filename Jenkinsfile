@@ -273,7 +273,7 @@ def runTests(env) {
 
     // Use try/catch if you want to continue with notification only even if tests fail
     try {
-        git GITHUB_PROJECT -b develop
+        git ([url: GITHUB_PROJECT, branch: 'develop'])
         sh '''
             npm config set registry="http://registry.npmjs.org/"
             npm install
