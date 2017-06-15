@@ -7,13 +7,13 @@ import hudson.model.*
  */
 
 // Change these variables for your project
-@Field def GITHUB_PROJECT = "https://github.qualcomm.com/lsacco/swagger-rest.git"
-@Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.qualcomm.com/lsacco/swagger-rest"
+@Field def GITHUB_PROJECT = "https://github.myco.com/lsacco/swagger-rest.git"
+@Field def DOCKER_APPLICATION_IMAGE = "https://docker-registry.myco.com/lsacco/swagger-rest"
 @Field def APPLICATION_NAME = "swagger-rest"
 @Field def DOCKER_TAG = "lsacco/" + APPLICATION_NAME
 @Field def DOCKER_APPLICATION_TAG = "latest"
 @Field def DOCKER_CONTAINER_NAME = APPLICATION_NAME + "_" + System.currentTimeMillis()
-@Field def EMAIL_PROJECT = "lsacco@qualcomm.com"
+@Field def EMAIL_PROJECT = "lsacco@myco.com"
 @Field def SSATSVC_CREDENTIALS_ID = "apc-ssatsvc"
 @Field def QUAY_CREDENTIALS_ID = "apc-quay"
 @Field def APC_NAMESPACE = "/runq/team/runq-apc-jenkins/qual"
@@ -22,11 +22,11 @@ import hudson.model.*
 @Field def MASTER_NODE = "master"
 @Field def SLAVE_NODE = "slave"
 @Field def SLAVE_NAME = "jenkins-slave-" + System.currentTimeMillis()
-@Field def APPLICATION_DOMAIN = ".runq-sd-d.qualcomm.com"
-@Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.qualcomm.com:4243"
-@Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.qualcomm.com/lsacco/jenkins-slave"
+@Field def APPLICATION_DOMAIN = ".runq-sd-d.myco.com"
+@Field def DOCKER_MACHINE_HOSTNAME = "tcp://docker-machine.myco.com:4243"
+@Field def DOCKER_SLAVE_IMAGE = "https://docker-registry.myco.com/lsacco/jenkins-slave"
 @Field def DOCKER_SLAVE_TAG = "1.6" // Must use slave with docker.io installed
-@Field def APC_CLUSTER_ID = "https://runq-sd-d.qualcomm.com"
+@Field def APC_CLUSTER_ID = "https://runq-sd-d.myco.com"
 @Field def APC_VERSION = "0.28.2"
 @Field def APC_VIRTUAL_NETWORK = APC_NAMESPACE + "::" + "jenkins-apc-network"
 @Field def APC_SLAVE_DOCKER_JOB_NAME = APC_NAMESPACE + "::" + SLAVE_NAME
